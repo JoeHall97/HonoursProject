@@ -1,0 +1,192 @@
+/usr/lib/jvm/java-11-openjdk-11.0.3.7-5.fc30.x86_64/bin/java -javaagent:/home/beans/idea-IC-183.4886.37/lib/idea_rt.jar=36007:/home/beans/idea-IC-183.4886.37/bin -Dfile.encoding=UTF-8 -classpath /home/beans/IdeaProjects/HonoursProject/out/production/HonoursProject DAGBenchmark -d /home/beans/Documents/COMPX520/XML_Files/TestDAG.xml
+-------------- DAG --------------
+
+Node Number: 1
+Connections: 
+    2
+    3
+Computational Weight: 15%
+Concurrent: true
+Has to wait: false
+
+Node Number: 2
+Connections: 
+    4
+Computational Weight: 20%
+Concurrent: true
+Has to wait: false
+
+Node Number: 3
+Connections: 
+    5
+Computational Weight: 35%
+Concurrent: true
+Has to wait: false
+
+Node Number: 4
+Connections: 
+    5
+Computational Weight: 15%
+Concurrent: true
+Has to wait: false
+
+Node Number: 5
+Connections: 
+    None
+Computational Weight: 15%
+Concurrent: true
+Has to wait: false
+
+Node 1 task length: 1500
+Node 2 task length: 2000
+Node 3 task length: 3500
+Node 4 task length: 1500
+Node 5 task length: 1500
+
+-------------- DAG --------------
+100
+Counter 0: 0
+92
+Counter 0: 8
+84
+Counter 0: 16
+76
+Counter 0: 24
+68
+Counter 0: 32
+60
+Counter 0: 40
+52
+Counter 0: 48
+44
+Counter 0: 56
+36
+Counter 0: 64
+28
+Counter 0: 72
+20
+Counter 0: 80
+12
+Counter 0: 88
+4
+Counter 0: 96
+0
+Counter 0: 100
+NEXT POS
+100
+Counter 1: 0
+92
+Counter 1: 8
+84
+Counter 1: 16
+76
+Counter 1: 24
+68
+Counter 1: 32
+60
+Counter 1: 40
+52
+Counter 1: 48
+44
+Counter 1: 56
+36
+Counter 1: 64
+28
+Counter 1: 72
+20
+Counter 1: 80
+12
+Counter 1: 88
+4
+Counter 1: 96
+0
+Counter 1: 100
+NEXT POS
+100
+Counter 2: 0
+92
+Counter 2: 8
+84
+Counter 2: 16
+76
+Counter 2: 24
+68
+Counter 2: 32
+60
+Counter 2: 40
+52
+Counter 2: 48
+44
+Counter 2: 56
+36
+Counter 2: 64
+28
+Counter 2: 72
+20
+Counter 2: 80
+12
+Counter 2: 88
+4
+Counter 2: 96
+0
+Counter 2: 100
+NEXT POS
+100
+Counter 3: 0
+92
+Counter 3: 8
+84
+Counter 3: 16
+76
+Counter 3: 24
+68
+Counter 3: 32
+60
+Counter 3: 40
+52
+Counter 3: 48
+44
+Counter 3: 56
+36
+Counter 3: 64
+28
+Counter 3: 72
+20
+Counter 3: 80
+12
+Counter 3: 88
+4
+Counter 3: 96
+0
+Counter 3: 100
+NEXT POS
+200
+Counter 4: 0
+184
+Counter 4: 8
+168
+Counter 4: 16
+152
+Counter 4: 24
+136
+Counter 4: 32
+120
+Counter 4: 40
+104
+Counter 4: 48
+88
+Counter 4: 56
+72
+Counter 4: 64
+56
+Counter 4: 72
+40
+Counter 4: 80
+24
+Counter 4: 88
+8
+Counter 4: 96
+0
+Counter 4: 100
+
+Process finished with exit code 0

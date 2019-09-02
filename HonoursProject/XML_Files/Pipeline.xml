@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DAG>
+    <DAGNode>
+        <name>1</name>
+        <connections>2</connections>
+        <weight>12</weight>
+	<chainLength>1</chainLength>
+    </DAGNode>
+    <DAGNode>
+        <name>2</name>
+        <connections>3</connections>
+        <weight>12</weight>
+	<chainLength>2</chainLength>
+    </DAGNode>
+    <DAGNode>
+        <name>3</name>
+        <connections>4</connections>
+        <weight>13</weight>
+	<chainLength>3</chainLength>
+    </DAGNode>
+    <DAGNode>
+        <name>4</name>
+        <connections>5</connections>
+        <weight>12</weight>
+	<chainLength>4</chainLength>
+    </DAGNode>
+    <DAGNode>
+        <name>5</name>
+        <connections>6</connections>
+        <weight>12</weight>
+	<chainLength>5</chainLength>
+    </DAGNode>
+    <DAGNode>
+        <name>6</name>
+        <connections></connections>
+        <weight>13</weight>
+	<chainLength>6</chainLength>
+    </DAGNode>
+</DAG>
