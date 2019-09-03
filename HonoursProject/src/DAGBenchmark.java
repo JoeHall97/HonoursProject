@@ -314,7 +314,7 @@ public class DAGBenchmark {
                     dag[0].getInputQueue().add(10);
 
 	    }
-	    //Calculate the set-point
+	    //calculate the set-point
 	    for(int i=0;i<setpoint.length;i++) {
 		if(!dag[i].getFinished())
 		    setpoint[i] = (wave * getW(count)) / dag[i].getChainLength();
@@ -407,10 +407,14 @@ public class DAGBenchmark {
 
     ///TODO: Adjust W
     private static int getW(int i) {
-        if(i<10)
-            return 20;
-        else if(i<50)
-            return 40;
+        if(i>10)
+            return 25;
+        else if(i>25)
+            return 50;
+        else if(i>50)
+            return 75;
+        else if(i>75)
+            return 100;
         return 10;
     }
 
