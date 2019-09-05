@@ -407,15 +407,15 @@ public class DAGBenchmark {
 
     ///TODO: Adjust W
     private static int getW(int i) {
-        if(i>10)
-            return 25;
-        else if(i>25)
-            return 50;
-        else if(i>50)
+        if(i<10)
+            return 10;
+        else if(i<25)
+            return 35;
+        else if(i<50)
+            return 55;
+        else if(i<75)
             return 75;
-        else if(i>75)
-            return 100;
-        return 10;
+        return 95;
     }
 
     /// Ensures that the output of the PID controller doesn't over allocate threads
