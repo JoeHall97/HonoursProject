@@ -7,9 +7,18 @@ Created on Tue Aug 20 16:07:02 2019
 """
 
 import pandas as pd
+from os import listdir
+from os.path import isfile
 
 dags = ['Pipeline', 'MPEG', 'CallGraph']
-for dName in dags:
+folders = []
+for folder in listdir('.'):
+    if not isfile(folder):
+        folders.append([folder + '/' + d for d in dags])
+# flatten the list of folders
+folders = [item for f in folders for item in f]
+
+for dName in folders:
     inputFiles = []
     outputFiles = []
     timeFiles = []
