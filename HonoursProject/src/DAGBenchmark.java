@@ -107,7 +107,7 @@ class DAGNode {
                         outputQueue[i].add(10);
                 }
                 taskCount++;
-                if (taskCount == 100) {  //if the threadpool has executed all of the required task, set finished and exit out
+                if (taskCount == 150) {  //if the threadpool has executed all of the required task, set finished and exit out
                     isFinished = true;
                     break;
                 }
@@ -139,13 +139,13 @@ class DAGNode {
         if(size>=0 && size<=MAX_THREADS) {
             this.threads = new ArrayList<TaskThread>(size);
             for (int i = 0; i < size; i++)
-                this.threads.add(new TaskThread(weight*40));
+                this.threads.add(new TaskThread(weight*20));
         }
         //if the given number of threads is larger than the max number of threads, assign the max
         else if(size>MAX_THREADS) {
             this.threads = new ArrayList<TaskThread>(MAX_THREADS);
             for(int i=0;i<MAX_THREADS;i++)
-                this.threads.add(new TaskThread(weight*40));
+                this.threads.add(new TaskThread(weight*20));
         }
         //if the given number of threads is negative, assign zero
         else if(size<0)
@@ -301,7 +301,7 @@ public class DAGBenchmark {
         long startTime = System.currentTimeMillis();    //start time
         long[] times = new long[dag.length+1];          //times for each of the threadpools
 
-        while(!dag[dag.length-1].getFinished()) {   //while the last node hasn't finished executing
+        while(!dagFinished()) {   //while the last node hasn't finished executing
             StringBuilder inputBuilder = new StringBuilder();
             StringBuilder outputBuilder = new StringBuilder();
             List<ExecutorService> executors = new ArrayList<>();    //executors from the thread pools
@@ -405,17 +405,41 @@ public class DAGBenchmark {
         outputWriter.close();
     }
 
+    private static boolean dagFinished() {
+        for(DAGNode d: dag)
+            if(!d.getFinished())
+                return false;
+        return true;
+    }
+
     ///TODO: Adjust W
     private static int getW(int i) {
+//        if(i<10)
+//            return 10;
+//        else if(i<25)
+//            return 35;
+//        else if(i<50)
+//            return 55;
+//        else if(i<75)
+//            return 75;
+//        return 95;
         if(i<10)
             return 10;
         else if(i<25)
-            return 35;
+            return 15;
         else if(i<50)
-            return 55;
-        else if(i<75)
-            return 75;
-        return 95;
+            return 20;
+        return 30;
+        //THIRD TEST W
+//        if(i>10)
+//            return 25;
+//        else if(i>25)
+//            return 50;
+//        else if(i>50)
+//            return 75;
+//        else if(i>75)
+//            return 100;
+//        return 10;
     }
 
     /// Ensures that the output of the PID controller doesn't over allocate threads
@@ -441,9 +465,11 @@ public class DAGBenchmark {
             int[] in = new int[input.length];
             boolean[] increased = new boolean[in.length];
             for(int i=0;i<input.length;i++) {
-                if(input[i]>0)
+                if(input[i]>0){
                     //scale the input based on it's percentage of the total
-                    in[i] = (int)((double)NUM_THREADS*((double)input[i]/(double)sum));
+                    double percent = (double)input[i]/(double)sum;
+                    in[i] = (int)((double)NUM_THREADS*percent);
+                }
             }
             //if all threads haven't been allocated, allocate them based on the size/number of threads
             while (Arrays.stream(in).sum()<NUM_THREADS) {
