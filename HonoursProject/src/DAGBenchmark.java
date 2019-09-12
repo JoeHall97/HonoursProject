@@ -107,7 +107,7 @@ class DAGNode {
                         outputQueue[i].add(10);
                 }
                 taskCount++;
-                if (taskCount == 150) {  //if the threadpool has executed all of the required task, set finished and exit out
+                if (taskCount == 100) {  //if the threadpool has executed all of the required task, set finished and exit out
                     isFinished = true;
                     break;
                 }
@@ -285,6 +285,7 @@ public class DAGBenchmark {
 	throws IOException
     {
         int[] setpoint = new int[dag.length];
+        boolean[] wasPos = new boolean[dag.length];
         finished = new boolean[dag.length];
         initialseThreadPools(errorProbability);
 
@@ -308,7 +309,7 @@ public class DAGBenchmark {
             
 	    //add inputs based on a sine wave
 	    double radians = (Math.PI / SCALEFACTOR) * count;
-	    int wave = (int)(A * Math.sin(radians)) + 1;
+	    int wave = Math.abs( (int)(A * Math.sin(radians)) + 1 );
 	    if(!dag[0].getFinished()) {     //if the first node hasn't finished, keep adding items to its' input
                 for(int j=0;j<wave;j++)
                     dag[0].getInputQueue().add(10);
@@ -316,16 +317,16 @@ public class DAGBenchmark {
 	    }
 	    //calculate the set-point
 	    for(int i=0;i<setpoint.length;i++) {
-		if(!dag[i].getFinished())
-		    setpoint[i] = (wave * getW(count)) / dag[i].getChainLength();
-		else
-		    setpoint[i] = 0;
+            if(!dag[i].getFinished())
+                setpoint[i] = (wave * getW(count)) / dag[i].getChainLength();
+            else
+                setpoint[i] = 0;
 	    }
 	    count++;
-	    if(debug && executeStrategy==1)
-		System.out.print("SETPOINT : [");
+	    if(debug && executeStrategy==2)
+		    System.out.print("SETPOINT : [");
             for(int i=0;i<dag.length;i++) {    //for each node in the dag, execute it
-            if(debug && executeStrategy==1)
+            if(debug && executeStrategy==2)
                 System.out.print(setpoint[i] + " ");
                     inputBuilder.append(inputThreads[i]);
                     dag[i].resizeThreadpool(inputThreads[i]);
@@ -346,7 +347,7 @@ public class DAGBenchmark {
                             System.out.println("Node " + i + ": " + times[i] / 1e3 + " seconds.");
                     }
                 }
-            if(debug && executeStrategy==1)
+            if(debug && executeStrategy==2)
             System.out.println(']');
             for(ExecutorService es: executors)  //wait for all the thread pools to finish executing
                     while(!es.isTerminated()) {    }
@@ -382,8 +383,14 @@ public class DAGBenchmark {
                 inputThreads = pipelineExecute(outputQueues);
             else if(executeStrategy==1)
                 inputThreads = proportionalExecute(outputQueues);
-            else if(executeStrategy==2)
-                inputThreads = clampInput(pidExecute(outputQueues,setpoint));
+            else if(executeStrategy==2) {
+                inputThreads = pidExecute(outputQueues, setpoint);
+                for(int i=0;i<wasPos.length;i++) {
+                    if(inputThreads[i]<-100)
+                        System.out.print("");
+                }
+                inputThreads = clampInput(inputThreads);
+            }
         }
         times[times.length-1] = System.currentTimeMillis() - startTime; //total time to execute the DAG
         if(debug)
@@ -414,22 +421,18 @@ public class DAGBenchmark {
 
     ///TODO: Adjust W
     private static int getW(int i) {
+        if(i<10)
+            return 1;
+        else if(i<50)
+            return 2;
+        return 3;
 //        if(i<10)
 //            return 10;
 //        else if(i<25)
-//            return 35;
+//            return 15;
 //        else if(i<50)
-//            return 55;
-//        else if(i<75)
-//            return 75;
-//        return 95;
-        if(i<10)
-            return 10;
-        else if(i<25)
-            return 15;
-        else if(i<50)
-            return 20;
-        return 30;
+//            return 20;
+//        return 30;
         //THIRD TEST W
 //        if(i>10)
 //            return 25;
@@ -463,27 +466,27 @@ public class DAGBenchmark {
         //if the total number of threads is greater than the maximum
         else{
             int[] in = new int[input.length];
-            boolean[] increased = new boolean[in.length];
+//            boolean[] increased = new boolean[in.length];
             for(int i=0;i<input.length;i++) {
                 if(input[i]>0){
                     //scale the input based on it's percentage of the total
                     double percent = (double)input[i]/(double)sum;
-                    in[i] = (int)((double)NUM_THREADS*percent);
+                    in[i] = Math.round((float)(Double.valueOf(NUM_THREADS)*percent));
                 }
             }
             //if all threads haven't been allocated, allocate them based on the size/number of threads
-            while (Arrays.stream(in).sum()<NUM_THREADS) {
-                int largeIndex = 0;
-                int largestValue = 0;
-                for(int i=0;i<in.length;i++) {
-                    if(in[i]>largestValue && !increased[i]) {
-                        largestValue = in[i];
-                        largeIndex = i;
-                    }
-                }
-                in[largeIndex]++;
-                increased[largeIndex] = true;
-            }
+//            while (Arrays.stream(in).sum()<NUM_THREADS) {
+//                int largeIndex = 0;
+//                int largestValue = 0;
+//                for(int i=0;i<in.length;i++) {
+//                    if(input[i]>largestValue && !increased[i]) {
+//                        largestValue = input[i];
+//                        largeIndex = i;
+//                    }
+//                }
+//                in[largeIndex]++;
+//                increased[largeIndex] = true;
+//            }
             return in;
         }
     }
