@@ -422,10 +422,10 @@ public class DAGBenchmark {
     ///TODO: Adjust W
     private static int getW(int i) {
         if(i<10)
-            return 1;
+            return 5;
         else if(i<50)
-            return 2;
-        return 3;
+            return 15;
+        return 25;
 //        if(i<10)
 //            return 10;
 //        else if(i<25)
@@ -540,9 +540,12 @@ public class DAGBenchmark {
         for(int i=0;i<outputVals.length;i++)
             if(outputVals[i]>0)
                 count+=outputVals[i];
-        for(int i=0;i<input.length;i++)
-            if(outputVals[i]>0)
-                input[i] = NUM_THREADS*(count/outputVals[i]);
+        for(int i=0;i<input.length;i++) {
+            if (outputVals[i] > 0) {
+                float divisor = (outputVals[i] / (float) count);
+                input[i] = (int) ((new Float(NUM_THREADS)) * divisor);
+            }
+        }
         return input;
     }
 
