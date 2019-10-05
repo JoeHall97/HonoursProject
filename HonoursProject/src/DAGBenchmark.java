@@ -59,6 +59,7 @@ class DAGNode {
     //probability of error
     private int errorProb = 10;
     private Random rand = new Random();
+    private static int maxNumTasks = 150;
     private static final int  MAX_THREADS = Runtime.getRuntime().availableProcessors();
 
     /* Constructors */
@@ -107,7 +108,7 @@ class DAGNode {
                         outputQueue[i].add(10);
                 }
                 taskCount++;
-                if (taskCount == 100) {  //if the threadpool has executed all of the required task, set finished and exit out
+                if (taskCount == maxNumTasks) {  //if the threadpool has executed all of the required task, set finished and exit out
                     isFinished = true;
                     break;
                 }
@@ -153,6 +154,15 @@ class DAGNode {
     }
 
     /* Gets and Sets */
+
+    public static int getMaxNumTasks() {
+        return maxNumTasks;
+    }
+
+    public static void setMaxNumTasks(int maxNumTasks) {
+        DAGNode.maxNumTasks = maxNumTasks;
+    }
+
     public int getChainLength() { return chainLength; }
 
     public void setChainLength(int chainLength) { this.chainLength = chainLength; }
@@ -190,6 +200,8 @@ class DAGNode {
     public int getErrorProb() { return errorProb; }
 
     public void setErrorProb(int prob) { this.errorProb = prob; }
+
+    public int getTaskCount() { return taskCount; }
 }
 
 public class DAGBenchmark {
@@ -207,8 +219,16 @@ public class DAGBenchmark {
     public static void main(String[] args)
         throws ParserConfigurationException,SAXException,IOException
     {
-        if(args.length!=5 && args.length!=6 && args.length!=8 && args.length!=9){
+        if(args.length!=2 && args.length!=5 && args.length!=6 && args.length!=8 && args.length!=9){
             System.err.println("Usage: java DAGBenchmark <debug> <fileName> <outputFolder> <numRuns> <executeStrat> <errorProb> <P-value> <I-value> <D-value>");
+            return;
+        }
+        if(args.length==2 && args[0].compareTo("-t")==0) {
+            identifySystem(args[1]);
+            System.exit(0);
+        }
+        else if(args.length==2) {
+            System.err.println("Usage: java DAGBenchmark <debug> <outputFolder>");
             return;
         }
         String fileName, outputFolder;
@@ -278,6 +298,120 @@ public class DAGBenchmark {
             System.out.println("Node " + dag[i].getNodeNumber() + " task length: " + (100*dag[i].getWeight()));
         System.out.println();   //Padding
         System.out.println("-------------- DAG --------------");
+    }
+
+    private static void identifySystem(String outputFolder)
+        throws IOException
+    {
+        String distType = "flat";
+        DAGNode [] sys = new DAGNode[1];
+        sys[0] = new DAGNode();
+        sys[0].setNodeNumber(1);
+        sys[0].setConnections(null);
+        sys[0].setChainLength(1);
+        sys[0].setErrorProb(10);
+        sys[0].setFinished(false);
+        sys[0].setNumInputs(1);
+        sys[0].setWeight(25);
+        //set up file writer
+        FileWriter fileWriter = new FileWriter(new File(outputFolder + "/SI_1-8_run3.csv"));
+
+        //start constant tests
+        Queue<Integer>[] outputQ = new Queue[1];
+        outputQ[0] = new LinkedList<>();
+        Queue<Integer> inputQ = new LinkedList<Integer>();
+        sys[0].setTaskCount(0);
+        sys[0].setMaxNumTasks(3000);
+        sys[0].InitialiseThreadPool(inputQ,outputQ);
+//        boolean finished = false;
+        int yCurr = -1,yPrev,count = 0, startU = 1, jumpU = 8, tCount = 0, waveCount = 1;
+        int[] derResults = new int[7];
+        boolean stabilised = false;
+        int distrubance = 12;
+        sys[0].resizeThreadpool(startU);
+        while(true) {
+            //add items to the queue
+            if(distType=="sine") {
+                final int A = 8;   //magnitude
+                final int SCALEFACTOR = 20; //frequency
+                //add inputs based on a sine wave
+                double radians = (Math.PI / SCALEFACTOR) * waveCount;
+                distrubance = Math.abs((int)(A * Math.sin(radians)) + 1 );
+//                for(int i=0;i<wave;i++)
+//                    inputQ.add(10);
+                waveCount++;
+            }
+            for (int i = 0; i < distrubance; i++)
+                inputQ.add(10);
+            System.out.println("Tasks left: " + sys[0].getTaskCount());
+            if(tCount==100) {
+                System.err.println("100 STEPS REACHED");
+                fileWriter.flush();
+                fileWriter.close();
+                System.exit(1);
+            }
+            sys[0].executeThreadPool();
+            while(!sys[0].getExecutor().isTerminated()) {   }
+            yPrev = yCurr;
+            yCurr = sys[0].getInputQueue().size();
+            if(yPrev!=-1) {
+                int newDer = yCurr - yPrev;
+                if(stabilised)
+                    tCount++;
+                fileWriter.write(newDer + "," + sys[0].getThreads().size() + "," + distrubance + '\n');
+                System.out.println(yCurr);
+                if(count<5) {
+                    derResults[derResults.length-count-1] = newDer;
+                    count++;
+                }
+                else {
+                    if(count==5) {
+                        derResults[0] = newDer;
+                        count++;
+                    }
+                    else {
+                        for(int i=derResults.length-1;i>0;i--)
+                            derResults[i] = derResults[i-1];
+                        derResults[0] = newDer;
+                    }
+                    //check the system has stabilised
+                    if(distType=="flat" && false) {
+                        for (int i = 0; i < derResults.length - 1; i++) {
+                            for (int j = 0; j < derResults.length - 1; j++)
+                                System.out.print(derResults[j] + ",");
+                            System.out.println(derResults[derResults.length - 1]);
+                            if (derResults[i] != derResults[i + 1])
+                                break;
+                            else if (i == derResults.length - 2 && !stabilised) {
+                                System.out.println("STABILISED");
+                                stabilised = true;
+                                derResults = new int[6];    //reset results
+                                count = 0;
+                                sys[0].resizeThreadpool(jumpU); //resize the thread pool
+                                sys[0].setTaskCount(0);
+                            }
+                        /*else if(i==derResults.length-2) {
+                            fileWriter.flush();
+                            fileWriter.close();
+                            return;
+                        }*/
+                        }
+                    }
+                    else if(distType=="sine" || true) {
+                        if(count==25 && !stabilised) {
+                            System.out.println("STABILISED");
+                            stabilised = true;
+                            derResults = new int[6];    //reset results
+                            count = 0;
+                            sys[0].resizeThreadpool(jumpU); //resize the thread pool
+                            sys[0].setTaskCount(0);
+                        }
+                        else if(!stabilised)
+                            count++;
+                    }
+                }
+            }
+        }
     }
 
     ///Executes the given Directed A-cyclic Graph, writing the outputs to a given folder
@@ -422,10 +556,10 @@ public class DAGBenchmark {
     ///TODO: Adjust W
     private static int getW(int i) {
         if(i<10)
-            return 5;
-        else if(i<50)
             return 15;
-        return 25;
+        else if(i<50)
+            return 25;
+        return 35;
 //        if(i<10)
 //            return 10;
 //        else if(i<25)
