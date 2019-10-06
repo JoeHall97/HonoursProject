@@ -556,10 +556,10 @@ public class DAGBenchmark {
     ///TODO: Adjust W
     private static int getW(int i) {
         if(i<10)
-            return 15;
+            return 3;
         else if(i<50)
-            return 25;
-        return 35;
+            return 2;
+        return 1;
 //        if(i<10)
 //            return 10;
 //        else if(i<25)
@@ -585,21 +585,23 @@ public class DAGBenchmark {
         if(debug)
             System.out.print("CONTROLLER OUTPUT: [ ");
         int sum = 0;
+        int[] in = new int[input.length];
         //calculate the total number of allocated threads
-        for(int in:input) {
+        for(int i=0;i<input.length;i++) {
             if(debug)
-                System.out.print(in + " ");
-            if(in>0)
-                sum += in;
+                System.out.print(input[i] + " ");
+            if(input[i]>0) {
+                sum += input[i];
+                in[i] = input[i];
+            }
         }
         if(debug)
             System.out.println(']');
         //if the total number of threads is less than or equal to the maximum, return
         if(sum<=NUM_THREADS)
-            return input;
+            return in;
         //if the total number of threads is greater than the maximum
         else{
-            int[] in = new int[input.length];
 //            boolean[] increased = new boolean[in.length];
             for(int i=0;i<input.length;i++) {
                 if(input[i]>0){
