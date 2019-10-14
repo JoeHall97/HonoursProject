@@ -525,6 +525,8 @@ public class DAGBenchmark {
                 }
                 inputThreads = clampInput(inputThreads);
             }
+            else if(executeStrategy==3)
+                inputThreads = inOrderExecute(outputQueues);
         }
         times[times.length-1] = System.currentTimeMillis() - startTime; //total time to execute the DAG
         if(debug)
@@ -560,23 +562,6 @@ public class DAGBenchmark {
         else if(i<50)
             return 2;
         return 1;
-//        if(i<10)
-//            return 10;
-//        else if(i<25)
-//            return 15;
-//        else if(i<50)
-//            return 20;
-//        return 30;
-        //THIRD TEST W
-//        if(i>10)
-//            return 25;
-//        else if(i>25)
-//            return 50;
-//        else if(i>50)
-//            return 75;
-//        else if(i>75)
-//            return 100;
-//        return 10;
     }
 
     /// Ensures that the output of the PID controller doesn't over allocate threads
@@ -680,6 +665,17 @@ public class DAGBenchmark {
             if (outputVals[i] > 0) {
                 float divisor = (outputVals[i] / (float) count);
                 input[i] = (int) ((new Float(NUM_THREADS)) * divisor);
+            }
+        }
+        return input;
+    }
+
+    public static int[] inOrderExecute(int[] outputVals) {
+        int[] input = new int[outputVals.length];
+        for(int i=0;i<outputVals.length;i++) {
+            if(outputVals[i]>0) {
+                input[i] = NUM_THREADS;
+                break;
             }
         }
         return input;
